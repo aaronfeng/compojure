@@ -1,39 +1,53 @@
-<project name="compojure" default="jar">
+<project name="compojure" default="jar" xmlns:mvn="urn:maven-artifact-ant">
+
   <description>
     Compojure library package.
   </description>
 
-  <property name="build.dir" location="classes"/>
-  <property name="deps.dir" location="deps"/>
+  <property name="build.dir" location="build"/>
+  <property name="classes.dir" location="build/classes"/>
+  <property name="lib.dir" location="lib"/>
   <property name="source.dir" location="src"/>
   <property name="tests.dir" location="test"/>
-  <property name="compojure.jar" location="compojure.jar"/>
-  <property name="deps.file" value="deps.zip"/>
-  <property name="deps.url" value="http://cloud.github.com/downloads/weavejester/compojure/${deps.file}"/>
+  <property name="compojure.jar" value="${build.dir}/${ant.project.name}.jar"/>
 
   <path id="classpath">
-    <path location="${build.dir}"/>
+    <path location="${classes.dir}"/>
     <path location="${source.dir}"/>
-    <fileset dir="${deps.dir}">
+    <fileset dir="${lib.dir}">
       <include name="*.jar"/>
     </fileset>
   </path>
   
   <target name="clean" description="Remove generated files">
-    <delete file="${compojure.jar}"/>
     <delete dir="${build.dir}"/>
+    <delete dir="${lib.dir}"/>
   </target>
 
   <target name="init" depends="clean">
     <tstamp/>
     <mkdir dir="${build.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+  </target>
+
+  <target name="-setup-maven" description="Load Maven typedefs, read POM, establish dependencies.">
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"/>
+    <mvn:pom file="pom.xml" id="compojure.pom"/>
+    <mvn:dependencies pomRefId="compojure.pom" filesetId="dependency.fileset"/>
+  </target>
+
+  <target name="copy-libs" depends="-setup-maven" description="Copy libs from maven.">
+    <copy todir="${lib.dir}">
+      <fileset refid="dependency.fileset" />
+      <mapper type="flatten" />
+    </copy>
   </target>
 
   <target name="compile" depends="compile-compojure, compile-grizzly-server" description="Compile sources."/>
 
-  <target name="compile-compojure" depends="init" description="Compile compojure sources">
+  <target name="compile-compojure" depends="init, copy-libs" description="Compile compojure sources">
     <java classname="clojure.lang.Compile" fork="true">
-      <sysproperty key="clojure.compile.path" value="${build.dir}"/>
+      <sysproperty key="clojure.compile.path" value="${classes.dir}"/>
       <classpath refid="classpath"/>
       <arg value="compojure"/>
       <arg value="compojure.control"/>
@@ -58,13 +72,13 @@
 
   <target name="compile-grizzly-server" depends="compile-compojure" description="Compile Grizzly server" if="with.grizzly">
     <java classname="clojure.lang.Compile">
-      <sysproperty key="clojure.compile.path" value="${build.dir}"/>
+      <sysproperty key="clojure.compile.path" value="${classes.dir}"/>
       <classpath refid="classpath"/>
       <arg value="compojure.server.grizzly"/>
     </java>
   </target>
 
-  <target name="test" description="Run tests">
+  <target name="test" depends="copy-libs" description="Run tests">
     <java fork="true" classname="clojure.lang.Script">
       <classpath>
           <path refid="classpath"/>
@@ -78,12 +92,12 @@
     <jar jarfile="${compojure.jar}">
       <path location="LICENSE"/>
       <fileset dir="${source.dir}" includes="**/*.clj"/>
-      <fileset dir="${build.dir}" includes="**/*.class"/>
+      <fileset dir="${classes.dir}" includes="**/*.class"/>
     </jar>
   </target>
 
-  <target name="deps" description="Download dependencies and unzip">
-    <get usetimestamp="true" description="Clojure dependencies." src="${deps.url}" dest="${deps.file}"/>
-    <unzip src="${deps.file}" dest="."/>
+  <target name="install" depends="jar">
+    <mvn:install file="${compojure.jar}" pomrefid="compojure.pom"/>
   </target>
+
 </project>
