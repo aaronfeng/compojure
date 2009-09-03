@@ -13,18 +13,13 @@
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
-      <artifactId>clojure-lang</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <artifactId>clojure</artifactId>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure-contrib</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure-contrib</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>clojure-1.0-compatible</version>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
@@ -98,10 +93,6 @@
       <name>Java.net Repository for Maven</name>
       <url>http://download.java.net/maven/2/</url>
       <layout>default</layout>
-    </repository>
-    <repository>
-      <id>tapestry-snapshots</id>
-      <url>http://tapestry.formos.com/maven-snapshot-repository/</url>
     </repository>
   </repositories>
 
