@@ -19,7 +19,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure-contrib</artifactId>
-      <version>clojure-1.0-compatible</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
